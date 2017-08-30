@@ -3,6 +3,16 @@
 #include <nanogui/formhelper.h>
 #include <iostream>
 
+#include <vtkSmartPointer.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include "vtkProperty.h"
+#include "vtkCamera.h"
+#include "vtkCubeSource.h"
+#include "vtkPolyDataMapper.h"
+#include "vtkActor.h"
+
 using namespace nanogui;
 
 bool bvar = true;
@@ -17,6 +27,7 @@ enum test_enum {
 };
 test_enum enumval = Item2;
 Color colval(0.5f, 0.5f, 0.7f, 1.f);
+
 
 int main(int argc, char ** argv) 
 {
@@ -43,7 +54,33 @@ int main(int argc, char ** argv)
 	screen->setVisible(true);
 	screen->performLayout();
 	window->center();
-	nanogui::mainloop();
+	//-----------NEW - COISAS DA VTK----------------
+	vtkSmartPointer<vtkRenderWindow> renderWindow;
+	vtkSmartPointer<vtkRenderer> renderer;
+	vtkSmartPointer<vtkRenderWindowInteractor> interactor;
+	renderer = vtkSmartPointer<vtkRenderer>::New();
+	renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
+	renderWindow->AddRenderer(renderer);
+	interactor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+	interactor->SetRenderWindow(renderWindow);
+	vtkSmartPointer<vtkCubeSource> testeCubeSource = vtkSmartPointer<vtkCubeSource>::New();
+	testeCubeSource->SetCenter(0, 0, 0);
+	testeCubeSource->SetXLength(1);
+	testeCubeSource->SetYLength(1);
+	testeCubeSource->SetZLength(1);
+	vtkSmartPointer<vtkPolyDataMapper> testeCubeMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	testeCubeMapper->SetInputConnection(testeCubeSource->GetOutputPort());
+	vtkSmartPointer<vtkActor> testeCubeActor = vtkSmartPointer<vtkActor>::New();
+	testeCubeActor->SetMapper(testeCubeMapper);
+	testeCubeActor->GetProperty()->SetColor(1.0000, 0.3882, 0.2784);
+	testeCubeActor->RotateX(30.0);
+	testeCubeActor->RotateY(-45.0);
+	renderer->AddActor(testeCubeActor);
+	renderer->ResetCamera();
+	renderWindow->Render();
+
+
+	nanogui::mainloop();//Esse método blocka
 
 	nanogui::shutdown();
 	return EXIT_SUCCESS;
